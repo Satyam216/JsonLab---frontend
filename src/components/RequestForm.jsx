@@ -1,8 +1,7 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import { api } from "../api/api";
 
-export default function RequestForm({ setResponse }) {
+export default function RequestForm({ setResponse, selectedHistory }) {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
   const [headers, setHeaders] = useState([{ key: "", value: "" }]);
@@ -10,6 +9,39 @@ export default function RequestForm({ setResponse }) {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
 
+  /* =======================
+     AUTO-FILL FROM HISTORY
+     ======================= */
+  useEffect(() => {
+    if (!selectedHistory) return;
+
+    setUrl(selectedHistory.url || "");
+    setMethod(selectedHistory.method || "GET");
+
+    setHeaders(
+      Object.entries(selectedHistory.headers || {}).map(([k, v]) => ({
+        key: k,
+        value: v,
+      })) || [{ key: "", value: "" }]
+    );
+
+    setParams(
+      Object.entries(selectedHistory.params || {}).map(([k, v]) => ({
+        key: k,
+        value: v,
+      })) || [{ key: "", value: "" }]
+    );
+
+    setBody(
+      selectedHistory.body
+        ? JSON.stringify(selectedHistory.body, null, 2)
+        : ""
+    );
+  }, [selectedHistory]);
+
+  /* =======================
+     HELPERS
+     ======================= */
   const addHeader = () => {
     setHeaders([...headers, { key: "", value: "" }]);
   };
@@ -30,47 +62,52 @@ export default function RequestForm({ setResponse }) {
     setParams(updated);
   };
 
-  // Convert headers array into object
+  // Convert headers array → object
   const headersObject = {};
-  headers.forEach(h => {
+  headers.forEach((h) => {
     if (h.key) headersObject[h.key] = h.value;
   });
 
-  // Convert params array into object
+  // Convert params array → object
   const paramsObject = {};
-  params.forEach(p => {
+  params.forEach((p) => {
     if (p.key) paramsObject[p.key] = p.value;
   });
 
+  /* =======================
+     SEND REQUEST
+     ======================= */
   const sendRequest = async () => {
-  if (!url) {
-    alert("Enter a URL!");
-    return;
-  }
+    if (!url) {
+      alert("Enter a URL!");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const res = await api.post("/proxy", {
-      url,
-      method,
-      headers: headersObject,
-      params: paramsObject,
-      body: body ? JSON.parse(body) : {}
-    });
+    try {
+      const res = await api.post("/proxy", {
+        url,
+        method,
+        headers: headersObject,
+        params: paramsObject,
+        body: body ? JSON.parse(body) : {},
+      });
 
-    setResponse(res.data);
+      setResponse(res.data);
+    } catch (error) {
+      setResponse({
+        status: "Error",
+        data: error.response?.data || error.message,
+      });
+    }
 
-  } catch (error) {
-    setResponse({
-      status: "Error",
-      data: error.response?.data || error.message,
-    });
-  }
+    setLoading(false);
+  };
 
-  setLoading(false);
-};
-
+  /* =======================
+     UI
+     ======================= */
   return (
     <div className="space-y-6">
       {/* URL + METHOD */}
@@ -99,7 +136,9 @@ export default function RequestForm({ setResponse }) {
       <div>
         <div className="flex justify-between mb-2">
           <h3 className="text-gray-400 font-semibold">Query Params</h3>
-          <button onClick={addParam} className="text-emerald-400 text-sm">+ Add</button>
+          <button onClick={addParam} className="text-emerald-400 text-sm">
+            + Add
+          </button>
         </div>
 
         {params.map((p, i) => (
@@ -124,7 +163,9 @@ export default function RequestForm({ setResponse }) {
       <div>
         <div className="flex justify-between mb-2">
           <h3 className="text-gray-400 font-semibold">Headers</h3>
-          <button onClick={addHeader} className="text-emerald-400 text-sm">+ Add</button>
+          <button onClick={addHeader} className="text-emerald-400 text-sm">
+            + Add
+          </button>
         </div>
 
         {headers.map((h, i) => (

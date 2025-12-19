@@ -10,7 +10,7 @@ export const api = axios.create({
 
 // OPTIONAL: Interceptor for logging (future auth token)
 api.interceptors.request.use((config) => {
-  console.log("➡️ Request:", config);
+  console.log("➡️", config.method?.toUpperCase(), config.url);
   return config;
 });
 
@@ -24,3 +24,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+console.log("ENV:", import.meta.env.MODE);
+console.log("API:", import.meta.env.VITE_API_BASE_URL);

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../api/api";
+import { useAuth } from "../context/AuthContext";
+
 
 export default function RequestForm({ setResponse, selectedHistory }) {
   const [method, setMethod] = useState("GET");
@@ -8,6 +10,8 @@ export default function RequestForm({ setResponse, selectedHistory }) {
   const [params, setParams] = useState([{ key: "", value: "" }]);
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
 
   /* =======================
      AUTO-FILL FROM HISTORY
@@ -87,11 +91,12 @@ export default function RequestForm({ setResponse, selectedHistory }) {
 
     try {
       const res = await api.post("/proxy", {
+        user_id: user.uid,   // ✅ REAL USER ID
         url,
         method,
         headers: headersObject,
         params: paramsObject,
-        body: body ? JSON.parse(body) : {},
+        body: body ? JSON.parse(body) : {}
       });
 
       setResponse(res.data);

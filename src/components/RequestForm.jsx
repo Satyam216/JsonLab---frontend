@@ -87,6 +87,11 @@ export default function RequestForm({ setResponse, selectedHistory }) {
       return;
     }
 
+    if (!user) {
+    alert("Please login first");
+    return;
+  }
+
     setLoading(true);
 
     try {
@@ -100,6 +105,7 @@ export default function RequestForm({ setResponse, selectedHistory }) {
       });
 
       setResponse(res.data);
+      
     } catch (error) {
       setResponse({
         status: "Error",

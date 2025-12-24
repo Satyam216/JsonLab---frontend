@@ -25,7 +25,7 @@ export default function App() {
     <div className="h-screen bg-[#131416] text-white flex flex-col">
       <TopBar />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <div className="w-72 border-r border-[#2A2B2E]">
           <Sidebar onSelectHistory={setSelectedHistory} />
         </div>
@@ -37,7 +37,7 @@ export default function App() {
           />
         </div>
 
-        <div className="w-[420px] border-l border-[#2A2B2E] p-4">
+        <div className="w-[420px] border-l border-[#2A2B2E] p-4 overflow-hidden">
           <ResponseViewer response={response} />
         </div>
       </div>
